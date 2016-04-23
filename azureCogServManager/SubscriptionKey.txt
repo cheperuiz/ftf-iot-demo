@@ -1,6 +1,0 @@
-{
-    "faceKey" : "c9bed3984c3044058381433e9a40f02f",
-    "faceEndpoint" : "https://api.projectoxford.ai/face/v1.0/detect",
-    "emotionKey" : "6f39aed58c4a446aa5cb811d1193c52d",
-    "emotionEndpoint":"https://api.projectoxford.ai/emotion/v1.0/recognize"
-}

@@ -1,5 +1,0 @@
-{
-    "deviceId" : "PixiePro",
-    "deviceKey" : "I5He6WGpXfnBp8LvqRKyojksFKLCd9inAZQZreiLw1g="
-}
-
