@@ -58,25 +58,3 @@ def receive_message_callback(self,message, counter):
     print ("    Total calls received: %d" % receive_callbacks)
     return IoTHubMessageDispositionResult.ACCEPTED
 
-def test():
-    data = {
-                    "deviceId" : "PixiePro",
-                    "data" : "Hello IoT Hub from PixiePro!",
-                    "otherData" : "12345"
-        }
-    message = json.dumps(data)
-
-    with open("deviceKeys.txt","r") as f:
-        credentials = json.load(f)
-        f.close()
-
-    m = IoTHubManager(credentials)
-    m.send_message(message)
-    
-    status = m.get_status()
-    print status
-    while 'IDLE' not in str(status):
-        status = m.get_status()
-        time.sleep(0.1)
-    
-    print ("Send status: %s" % status)

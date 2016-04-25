@@ -48,7 +48,13 @@ class AzureCognitiveManager:
 			params = r[' params'])
         return response
 
-    def getFaceAttr(self,data):
+    def _getDataFromPath(self,path):
+        with open(path, 'rb' ) as f:
+            data = f.read()
+            return data
+    
+    def getFaceAttr(self,path):
+        data = self._getDataFromPath(path)
         req = self._configFaceAttrReq(data)
         response = self._makeRequest(req)
         print response.status_code, response.reason
@@ -56,7 +62,8 @@ class AzureCognitiveManager:
         face = max(faces,key=lambda item:item['faceRectangle']['width'])
         return face['faceAttributes']
 
-    def getEmotion(self,data):
+    def getEmotion(self,path):
+        data = self._getDataFromPath(path)
         req = self._configEmotionReq(data)
         response = self._makeRequest(req)
         print response.status_code, response.reason
@@ -65,18 +72,3 @@ class AzureCognitiveManager:
         emotion = max(face['scores'],key=face['scores'].get)
         return emotion
         
-def test():
-    with open("SubscriptionKey.txt","r") as f:
-        sub = json.load(f)
-        f.close() 
-
-    urlImage = './../faceDetector/img.jpg'
-    with open( urlImage, 'rb' ) as f:
-        img = f.read()
-
-    acm = AzureCognitiveManager(sub)
-    faceAttr = acm.getFaceAttr(img)
-    print faceAttr
-    emotion = acm.getEmotion(img)
-    print emotion
-    return acm

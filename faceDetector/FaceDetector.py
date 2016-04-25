@@ -52,7 +52,9 @@ class FaceDetector:
                                                                 )
                 return smiles
                 
-
+        def stop(self):
+                self._continue = False
+        
         def detectFace(self):                
                 self._cam = cv2.VideoCapture(0)
                 self._continue = True                
