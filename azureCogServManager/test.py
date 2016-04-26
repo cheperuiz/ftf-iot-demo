@@ -15,7 +15,7 @@ faceAttr, faceId = acm.getFaceAttr(urlImage)
 print faceAttr
 similar = acm.findSimilar(faceId)
 print similar
-#emotion = acm.getEmotion(img)
-#print 
+emotion = acm.getEmotion(urlImage)
+print emotion
 
 
