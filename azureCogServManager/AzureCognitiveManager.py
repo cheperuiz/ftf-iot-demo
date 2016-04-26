@@ -7,6 +7,7 @@ class AzureCognitiveManager:
         self._faceKey = s['faceKey']
         self._emotionEndpoint = s['emotionEndpoint']
         self._emotionKey = s['emotionKey']
+        self._findSimilarEndpoint = s['findSimilarEndpoint']
     
     def _configFaceAttrReq(self, data):
         headers = dict()
@@ -15,13 +16,13 @@ class AzureCognitiveManager:
 
         params = dict()
         params['returnFaceAttributes'] = 'age,gender,glasses'
-        params['returnFaceId'] = 'false'
+        params['returnFaceId'] = 'true'
         params['returnFaceLandmarks'] = 'false'
 
         r = dict()
         r['endpoint'] = self._faceEndpoint 
         r['headers'] = headers
-        r[' params'] = params
+        r['params'] = params
         r['json'] = None
         r['data'] = data
         return r
@@ -34,9 +35,26 @@ class AzureCognitiveManager:
         r = dict()
         r['endpoint'] = self._emotionEndpoint
         r['headers'] = headers
-        r[' params'] = None
+        r['params'] = None
         r['json'] = None
         r['data'] = data
+        return r
+
+    def _configFindSimilarReq(self, faceId):
+        headers = dict()
+        headers['Ocp-Apim-Subscription-Key'] = self._faceKey
+        headers['Content-Type'] = 'application/json'
+
+        jsonData = dict()
+        jsonData['faceId'] = faceId
+        jsonData['faceIds'] = [line.strip() for line in open("faceids.txt","r")]
+
+        r = dict()
+        r['endpoint'] = self._findSimilarEndpoint
+        r['headers'] = headers
+        r['params'] = None
+        r['json'] = jsonData
+        r['data'] = None
         return r
 
     def _makeRequest(self, r):
@@ -45,7 +63,7 @@ class AzureCognitiveManager:
 			json = r['json'], 
 			data = r['data'], 
 			headers = r['headers'], 
-			params = r[' params'])
+			params = r['params'])
         return response
 
     def _getDataFromPath(self,path):
@@ -60,7 +78,7 @@ class AzureCognitiveManager:
         print response.status_code, response.reason
         faces = json.loads(response.text)
         face = max(faces,key=lambda item:item['faceRectangle']['width'])
-        return face['faceAttributes']
+        return face['faceAttributes'], face['faceId']
 
     def getEmotion(self,path):
         data = self._getDataFromPath(path)
@@ -71,4 +89,12 @@ class AzureCognitiveManager:
         face = max(faces,key=lambda item:item['faceRectangle']['width'])
         emotion = max(face['scores'],key=face['scores'].get)
         return emotion
+
+    def findSimilar(self,faceId):
+        req = self._configFindSimilarReq(faceId)
+        response = self._makeRequest(req)
+        print response.status_code, response.reason
+        similar = json.loads(response.text)
+        return similar
+
         
