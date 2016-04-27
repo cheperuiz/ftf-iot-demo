@@ -1,5 +1,5 @@
 import cv2
-import sys
+import sys, os
 import json
 
 class FaceDetector:
@@ -11,7 +11,9 @@ class FaceDetector:
                 self._pathToImage = pathToImage
                 self._faceCascade = cv2.CascadeClassifier(weights['frontalFace'])
                 self._smileCascade = cv2.CascadeClassifier(weights['smile'])
-                self._resetAttr()
+                self.resetAttr()
+                self._cam = None
+                self._continue = False
 
         def __del__(self):
                 if self._cam:
@@ -25,12 +27,14 @@ class FaceDetector:
                 cv2.destroyAllWindows()
                 cv2.waitKey(1)
 
-        def _resetAttr(self):
+        def resetAttr(self):
                 self._faceDetected = False
                 self._smileDetected = False
                 self._capture = None
-                self._continue = False                
-                self._cam = None
+                try:
+                        os.remove(self._pathToImage)
+                except:
+                        pass
 
         def _getFacesInFrame(self,frame):
                 faces = self._faceCascade.detectMultiScale(
@@ -64,9 +68,10 @@ class FaceDetector:
                         gray=cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
                         faces = self._getFacesInFrame(gray)
                         for (x,y,w,h) in faces:
-                                self._faceDetected = True
                                 if self._capture is None:
                                         self._capture = img
+                                        cv2.imwrite(self._pathToImage,self._capture)
+                                self._faceDetected = True #This has to be done AFTER file has been written
                                 cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
                                 roi_gray=gray[y:y+h, x:x+w]
                                 roi_color=frame[y:y+h, x:x+w]

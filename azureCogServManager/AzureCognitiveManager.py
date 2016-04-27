@@ -1,4 +1,4 @@
-import requests, json
+import requests, json, os
 
 class AzureCognitiveManager:
 
@@ -47,8 +47,10 @@ class AzureCognitiveManager:
 
         jsonData = dict()
         jsonData['faceId'] = faceId
-        jsonData['faceIds'] = [line.strip() for line in open("faceids.txt","r")]
-
+        with open("azureCogServManager/faceids.txt","r") as f:
+            jsonData['faceIds'] = [line.strip() for line in f]
+            f.close()
+        
         r = dict()
         r['endpoint'] = self._findSimilarEndpoint
         r['headers'] = headers
@@ -91,10 +93,18 @@ class AzureCognitiveManager:
         return emotion
 
     def findSimilar(self,faceId):
+        if not os.path.isfile("azureCogServManager/faceids.txt"):
+            return None
         req = self._configFindSimilarReq(faceId)
+        print req
         response = self._makeRequest(req)
         print response.status_code, response.reason
-        similar = json.loads(response.text)
-        return similar
+        similars = json.loads(response.text)
+        print similars
+        if similars:
+            similar = max(similars,key=lambda item:item['confidence'])
+        else:
+            similar = similars
+        return similar            
 
         

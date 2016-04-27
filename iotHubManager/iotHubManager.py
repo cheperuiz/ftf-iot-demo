@@ -21,6 +21,7 @@ class IoTHubManager:
 
     def __init__(self, credentials):
         self._iothub_client_init(credentials)
+        self._deviceId = credentials['deviceId']
     
     def _iothub_client_init(self,credentials):
         deviceConnStr = str(self._connectionString % (credentials['deviceId'], credentials['deviceKey']))
