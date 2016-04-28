@@ -44,12 +44,13 @@ def startWebsocketServer():
     factory.protocol = ws.MyServerProtocol
 
     q = Queue.Queue()
-    ws.MyServerProtocol.setQueue(q)
+    r = Queue.Queue()
+    ws.MyServerProtocol.setQueue(q,r)
 
     reactor.listenTCP(8001, factory)
     t = threading.Thread(target = reactor.run, kwargs = {'installSignalHandlers':0})
     t.start()
-    return q
+    return q,r
 
 def pollMsg():
     while q.empty():
@@ -73,14 +74,12 @@ def startGame(msg):
             f.write(face._faceId+'\n')
             f.close()
         print "Hi, new person!"
-    
-    
+    r.put("Start")
 
 def stopGame(msg):
     print "STOP GAME!"
     faceDetector.stop()
     time.sleep(1)
-    #face._faceAttr,tempId = azureCognitive.getFaceAttr(capturePath)
     face._emotion = azureCognitive.getEmotion(capturePath)
     activity = encodeActivity(msg,face)
 
@@ -93,7 +92,8 @@ def stopGame(msg):
 ##        iotHub.send_message(json.dumps(activity))
 ##        time.sleep(3)
 
-    sys.exit()
+def pollResponse(msg):
+    pass
 
 
 def encodeActivity(msg,face):
@@ -115,17 +115,18 @@ def encodeActivity(msg,face):
     
 commands = {
         "stopGame" : stopGame,
-        "startGame" : startGame
+        "startGame" : startGame,
+        "pollResponse": pollResponse
         }
 
 def decodeMsg(msg):
-##    try:
+    try:
         print "received %s" % msg['cmd']
         commands[msg['cmd']](msg)
-##    except KeyError:
-##        print "Oops! Unknown command!"
-##    except Exception as e:
-##        print "Oops! Unexpected error!" + str(e)
+    except KeyError:
+        print "Oops! Unknown command!"
+    except Exception as e:
+        print "Oops! Unexpected error!" + str(e)
     
 faceDetector = None
 azureCognitive = None
@@ -135,9 +136,7 @@ face = None
 
 if __name__== "__main__":
     faceDetector, azureCognitive, iotHub, face = initObjects()
-    q = startWebsocketServer()
-
-    startGame(None)
+    q,r = startWebsocketServer()
 
     while True:
         msg = json.loads(pollMsg())

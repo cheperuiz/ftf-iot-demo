@@ -96,11 +96,9 @@ class AzureCognitiveManager:
         if not os.path.isfile("azureCogServManager/faceids.txt"):
             return None
         req = self._configFindSimilarReq(faceId)
-        print req
         response = self._makeRequest(req)
         print response.status_code, response.reason
         similars = json.loads(response.text)
-        print similars
         if similars:
             similar = max(similars,key=lambda item:item['confidence'])
         else:
